@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="6 Week Dumbbell Workout">
+<title>6 Week Dumbbell Workout</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0efe9;color:#111;min-height:100vh}
+header{background:#fff;border-bottom:2px solid #ddd;padding:16px 20px;position:sticky;top:0;z-index:20}
+header h1{font-size:20px;font-weight:700;color:#111}
+header p{font-size:13px;color:#555;margin-top:2px}
+.controls{background:#fff;border-bottom:2px solid #ddd;padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:flex;border:2px solid #ccc;border-radius:10px;overflow:hidden}
+.seg button{padding:8px 14px;font-size:14px;font-weight:600;border:none;background:transparent;color:#555;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.seg button.active{background:#111;color:#fff}
+.track-sel{display:flex;border:2px solid #ccc;border-radius:10px;overflow:hidden}
+.track-sel button{padding:8px 12px;font-size:13px;font-weight:600;border:none;background:transparent;color:#555;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.track-sel button.active.tc{background:#064d2a;color:#fff}
+.track-sel button.active.th{background:#2a1e7a;color:#fff}
+.track-sel button.active.ts{background:#7a1e1e;color:#fff}
+.export-btn{margin-left:auto;padding:8px 16px;font-size:13px;font-weight:600;border:2px solid #888;border-radius:10px;background:transparent;color:#333;cursor:pointer;font-family:inherit}
+.export-btn:active{background:#eee}
+.week-nav{display:flex;gap:8px;overflow-x:auto;padding:12px 20px;background:#fff;border-bottom:2px solid #ddd;scrollbar-width:none}
+.week-nav::-webkit-scrollbar{display:none}
+.week-btn{flex-shrink:0;padding:8px 16px;font-size:15px;border-radius:20px;border:2px solid #bbb;background:transparent;color:#444;cursor:pointer;font-family:inherit;font-weight:600;transition:all 0.15s}
+.week-btn.active{background:#111;color:#fff;border-color:#111}
+.main{padding:14px 20px 60px}
+.week-meta{margin-bottom:14px}
+.week-label{font-size:24px;font-weight:700;color:#111}
+.track-pill{display:inline-block;font-size:13px;font-weight:700;padding:5px 14px;border-radius:20px;margin-top:6px}
+.pill-c{background:#a8ecc8;color:#064d2a}
+.pill-h{background:#c9c0f5;color:#2a1e7a}
+.pill-s{background:#f5c0c0;color:#7a1e1e}
+.week-note{font-size:15px;color:#444;margin-top:8px;line-height:1.6}
+.day-section{background:#fff;border-radius:14px;margin-bottom:14px;overflow:hidden;border:1.5px solid #d0d0d0}
+.day-header{padding:14px 18px;background:#e8e8e8;border-bottom:1.5px solid #d0d0d0}
+.day-title{font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#222}
+.muscle-block{padding:0 18px}
+.muscle-label{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#777;padding:14px 0 4px;border-top:1px solid #f0f0f0;margin-top:4px}
+.muscle-label:first-child{border-top:none;margin-top:0}
+.exercise-item{padding:10px 0;border-bottom:1px solid #eee}
+.exercise-item:last-child{border-bottom:none}
+.ex-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ex-link{font-size:17px;color:#0055cc;text-decoration:none;font-weight:600;line-height:1.3}
+.ex-link:active{opacity:0.6}
+.ex-sets-label{font-size:14px;color:#222;font-weight:600;white-space:nowrap;text-align:right;min-width:90px;padding-top:2px}
+.ex-note{font-size:13px;color:#666;margin-top:3px;font-style:italic;line-height:1.4}
+.log-toggle{font-size:13px;color:#0055cc;font-weight:600;cursor:pointer;background:none;border:none;font-family:inherit;padding:4px 0 0;margin:0;display:block}
+.log-area{margin-top:8px;background:#f8f8f5;border-radius:10px;padding:10px 12px;border:1px solid #e0e0d8}
+.set-rows{display:flex;flex-direction:column;gap:6px}
+.set-row{display:flex;align-items:center;gap:8px;font-size:14px;color:#333}
+.set-row label{min-width:46px;font-weight:600;color:#555}
+.set-row input[type=number]{width:68px;padding:6px 8px;font-size:14px;border:1.5px solid #ccc;border-radius:8px;font-family:inherit;background:#fff;color:#111}
+.set-row input[type=number]:focus{outline:none;border-color:#0055cc}
+.set-row input[type=checkbox]{width:20px;height:20px;accent-color:#064d2a;cursor:pointer}
+.set-row .done-label{font-size:12px;color:#555}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:20px;font-weight:700;margin-bottom:16px}
+.modal pre{font-size:12px;background:#f5f5f0;padding:12px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto;border:1px solid #ddd;color:#111}
+.modal-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.modal-btns button{padding:10px 18px;font-size:14px;font-weight:600;border-radius:10px;border:2px solid #ccc;background:transparent;cursor:pointer;font-family:inherit;color:#111}
+.modal-btns button.primary{background:#111;color:#fff;border-color:#111}
+</style>
+</head>
+<body>
+<header>
+  <h1>6 Week Dumbbell Workout</h1>
+  <p>Tap any exercise name to see demo on ExRx</p>
+</header>
+<div class="controls">
+  <div class="seg">
+    <button onclick="setGym('db')" id="btn-db" class="active">Dumbbells</button>
+    <button onclick="setGym('gym')" id="btn-gym">Full Gym</button>
+  </div>
+  <div class="track-sel">
+    <button onclick="setTrack('c')" id="btn-c" class="active tc">Conditioning</button>
+    <button onclick="setTrack('h')" id="btn-h">Hypertrophy</button>
+    <button onclick="setTrack('s')" id="btn-s">Strength</button>
+  </div>
+  <button class="export-btn" onclick="showExport()">Export log</button>
+</div>
+<div class="week-nav" id="weekNav"></div>
+<div class="main" id="content"></div>
+<div class="modal-bg" id="exportModal">
+  <div class="modal">
+    <h2>Workout log</h2>
+    <pre id="exportText"></pre>
+    <div class="modal-btns">
+      <button class="primary" onclick="copyLog()">Copy to clipboard</button>
+      <button onclick="closeExport()">Close</button>
+    </div>
+  </div>
+</div>
+<script>
+var gym='db',track='c',currentWeek=0,logs={};
+function lk(w,d,s,e,set){return gym+'|'+w+'|'+d+'|'+s+'|'+e+'|'+set}
+function getLog(k){return logs[k]||{weight:'',reps:'',done:false}}
+function setLog(k,f,v){if(!logs[k])logs[k]={weight:'',reps:'',done:false};logs[k][f]=v}
+function setsFor(ex){return track==='c'?(ex.sets_c||ex.sets):track==='h'?(ex.sets_h||ex.sets):(ex.sets_s||ex.sets)}
+function noteFor(ex){return track==='c'?(ex.note_c||''):track==='h'?(ex.note_h||''):(ex.note_s||'')}
+function weekNote(w){return track==='c'?(w.note_c||''):track==='h'?(w.note_h||''):(w.note_s||'')}
+function trackInfo(){return track==='c'?{text:'Conditioning',cls:'pill-c'}:track==='h'?{text:'Hypertrophy',cls:'pill-h'}:{text:'Strength',cls:'pill-s'}}
+function currentData(){return gym==='db'?DB_WEEKS:GYM_WEEKS}
+function parseSetCount(s){var p=s.split(','),t=0;p.forEach(function(x){var m=x.trim().match(/^(\d+)x/);t+=m?parseInt(m[1]):1});return Math.min(t,10)}
+
+var DB_WEEKS=[
+{week:1,note_c:"Focus on form. Keep weights light.",note_h:"2 sec down tempo on every rep.",note_s:"Work up carefully — technique first.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight",note_h:"Work up; final 2 sets = 1x8 weight",note_s:"Work up; final 2 sets = 1x8 weight"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Incline dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Triceps",exercises:[
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell leg curl",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Single-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight"},
+{name:"Bent-over lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Two-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_c:"Work up; final 2 sets = 1x12 weight"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Concentration curl",url:"https://exrx.net/WeightExercises/Brachialis/DBConcentrationCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:2,note_c:"Add small weight where week 1 felt easy.",note_h:"Increase weight from week 1.",note_s:"Push heavier on main lifts.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Flat bench dumbbell pullover",url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"4x15",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell reverse lunge",url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell Romanian deadlift",url:"https://exrx.net/WeightExercises/OlympicLifts/RomanianDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Two-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat bench dumbbell pullover",url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Standing dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell upright row",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBUprightRow",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:3,note_c:"Push for better form and slightly more weight.",note_h:"Focus on full range of motion.",note_s:"Aim for new working weight PRs.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat bench dumbbell pullover",url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"4x15",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell alternating lunge",url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell leg curl",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Single-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Dumbbell Romanian deadlift",url:"https://exrx.net/WeightExercises/OlympicLifts/RomanianDeadlift",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Front + lateral + bent lateral raise (giant set)",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x12+10+8",sets_h:"3x10+8+8",sets_s:"3x8+8+6",note_c:"No rest between the 3 moves"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:4,note_c:"Final conditioning week. Benchmark your weights.",note_h:"Add weight vs week 3 where possible.",note_s:"Last heavy week before intensity shift.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"4x12",sets_h:"4x8",sets_s:"5x6"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Single-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Bent-over lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Two-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Dumbbell good morning",url:"https://exrx.net/WeightExercises/Hamstrings/BBStraightLegDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell upright row",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBUprightRow",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Concentration curl",url:"https://exrx.net/WeightExercises/Brachialis/DBConcentrationCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:5,note_c:"Higher volume conditioning push.",note_h:"Giant sets introduced — no rest between grouped moves.",note_s:"Work-up to heavy singles this week.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8",note_h:"Work up to heavy; final 2 sets = 1x8 weight"},
+{name:"Incline flyes + press (giant set)",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"3x8+10",sets_h:"4x6+8",sets_s:"4x5+6",note_c:"Flyes first, then press — no rest between"}]},
+{muscle:"Triceps",exercises:[
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8",note_c:"Final set to failure"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8"},
+{name:"Dumbbell curtsy squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Dumbbell step-up (onto bench)",url:"https://exrx.net/WeightExercises/GluteusMaximus/DBStepUp",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Single-leg Romanian deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/DBSingleLegStiffLegDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Dumbbell deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Two-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Dumbbell shrug",url:"https://exrx.net/WeightExercises/TrapeziusUpper/DBShrug",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Renegade row",url:"https://exrx.net/WeightExercises/BackGeneral/DBLyingRow",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Standing dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8"},
+{name:"Front + lateral + bent lateral raise (giant set)",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x12+10+8",sets_h:"3x10+8+8",sets_s:"4x8+8+6"}]},
+{muscle:"Biceps",exercises:[
+{name:"Dumbbell 21s",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"4x7+7+7",sets_h:"4x7+7+7",sets_s:"4x7+7+7",note_c:"Low range + mid range + full range"},
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:6,note_c:"Final week. Push output, keep form tight.",note_h:"Go heavier than week 5. Benchmark session.",note_s:"Max effort. Log every top weight.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10",note_h:"Work up; final 2 sets = 1x8 weight"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Incline dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Triceps",exercises:[
+{name:"Overhead dumbbell extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"4x10",sets_h:"4x10",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8",note_c:"Optional: drop set on last set"}]},
+{muscle:"Legs",exercises:[
+{name:"Goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"4x10",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell leg curl",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"3x10",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Single-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Bent-over lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8"},
+{name:"Two-arm dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"4x10",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8"},
+{name:"Concentration curl",url:"https://exrx.net/WeightExercises/Brachialis/DBConcentrationCurl",sets_c:"4x10",sets_h:"4x10",sets_s:"4x8"}]}]}]}
+];
+
+var GYM_WEEKS=[
+{week:1,note_c:"Learn movements. Control the weight.",note_h:"2 sec down tempo on every rep.",note_s:"Work up carefully — technique first.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Barbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Incline dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Triceps",exercises:[
+{name:"Cable pushdown",url:"https://exrx.net/WeightExercises/Triceps/CBPushdown",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Barbell back squat",url:"https://exrx.net/WeightExercises/Quadriceps/BBSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Leg curl machine",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Barbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Bent-over lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Barbell curl",url:"https://exrx.net/WeightExercises/Biceps/BBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Cable curl",url:"https://exrx.net/WeightExercises/Biceps/CBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:2,note_c:"Add weight where week 1 felt easy.",note_h:"Push heavier on main compound lifts.",note_s:"Increase working weight vs week 1.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Barbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat bench pullover",url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"French press (EZ bar)",url:"https://exrx.net/WeightExercises/Triceps/BBLyingTriExt",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Cable pushdown",url:"https://exrx.net/WeightExercises/Triceps/CBPushdown",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Barbell back squat",url:"https://exrx.net/WeightExercises/Quadriceps/BBSquat",sets_c:"4x15",sets_h:"4x10",sets_s:"5x8"},
+{name:"Front rack lunge",url:"https://exrx.net/WeightExercises/Quadriceps/BBLunge",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Romanian deadlift",url:"https://exrx.net/WeightExercises/OlympicLifts/RomanianDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Barbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Straight-arm cable pulldown",url:"https://exrx.net/WeightExercises/LatissimusDorsi/CBBentoverPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Military press (barbell)",url:"https://exrx.net/WeightExercises/DeltoidAnterior/BBMilitaryPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Barbell front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/BBFrontRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Upright row",url:"https://exrx.net/WeightExercises/DeltoidLateral/BBUprightRow",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Barbell curl",url:"https://exrx.net/WeightExercises/Biceps/BBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Cable curl",url:"https://exrx.net/WeightExercises/Biceps/CBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:3,note_c:"Giant sets introduced. No rest between grouped moves.",note_h:"Focus on full range of motion.",note_s:"Aim for new working weight records.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Incline barbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/BBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat bench pullover",url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"Cable kickback",url:"https://exrx.net/WeightExercises/Triceps/CBPushdown",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Cable pushdown",url:"https://exrx.net/WeightExercises/Triceps/CBPushdown",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Dumbbell French curl",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Barbell squat",url:"https://exrx.net/WeightExercises/Quadriceps/BBSquat",sets_c:"4x15",sets_h:"4x10",sets_s:"5x8"},
+{name:"Dumbbell alternating lunge",url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Leg curl machine",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Leg extension machine",url:"https://exrx.net/WeightExercises/Quadriceps/LVLegExtension",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Cable row",url:"https://exrx.net/WeightExercises/BackGeneral/CBSeatedRow",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Front + lateral + bent lateral raise (giant set)",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x12+10+8",sets_h:"3x10+8+6",sets_s:"3x8+8+6",note_c:"No rest between the 3 moves"},
+{name:"Overhead dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"EZ bar curl",url:"https://exrx.net/WeightExercises/Biceps/BBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Cable curl",url:"https://exrx.net/WeightExercises/Biceps/CBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:4,note_c:"Benchmark week. Note all weights used.",note_h:"Add weight vs week 3 where possible.",note_s:"Push for new top-set records.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Barbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Triceps",exercises:[
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Tricep extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Legs",exercises:[
+{name:"Front squat or goblet squat",url:"https://exrx.net/WeightExercises/Kettlebell/KBGobletSquat",sets_c:"4x12",sets_h:"4x8",sets_s:"5x6"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Bent-over lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Barbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Good morning",url:"https://exrx.net/WeightExercises/Hamstrings/BBStraightLegDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated barbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/BBSeatedMilitaryPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Upright row",url:"https://exrx.net/WeightExercises/DeltoidLateral/BBUprightRow",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Barbell curl",url:"https://exrx.net/WeightExercises/Biceps/BBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Concentration curl",url:"https://exrx.net/WeightExercises/Brachialis/DBConcentrationCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:5,note_c:"High volume. Drop sets introduced.",note_h:"Work-up sets with down sets to finish.",note_s:"Peak intensity — work up to 1x3.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Barbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/BBBenchPress",sets_c:"3x12",sets_h:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8",note_s:"Work up to 1x3; final 2 sets = 1x5 weight"},
+{name:"Incline flyes + press (giant set)",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"3x8+10",sets_h:"4x6+8",sets_s:"4x5+6",note_c:"Flyes first, then press — no rest between"}]},
+{muscle:"Triceps",exercises:[
+{name:"French press (dumbbell)",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Cable pushdown",url:"https://exrx.net/WeightExercises/Triceps/CBPushdown",sets_c:"3x10",sets_h:"4x8",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8",note_c:"Final set to failure"}]},
+{muscle:"Legs",exercises:[
+{name:"Barbell back squat",url:"https://exrx.net/WeightExercises/Quadriceps/BBSquat",sets_c:"3x12",sets_h:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8"},
+{name:"Curtsy squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Step up",url:"https://exrx.net/WeightExercises/GluteusMaximus/DBStepUp",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Single-leg Romanian deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/DBSingleLegStiffLegDeadlift",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Deadlift",url:"https://exrx.net/WeightExercises/GluteusMaximus/BBDeadlift",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Barbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Barbell shrug",url:"https://exrx.net/WeightExercises/TrapeziusUpper/BBShrug",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Renegade row",url:"https://exrx.net/WeightExercises/BackGeneral/DBLyingRow",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Standing barbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/BBMilitaryPress",sets_c:"3x12",sets_h:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8",sets_s:"1x10, 1x8, 1x6, 1x5, 1x3, 2x8"},
+{name:"Front + lateral + bent lateral raise (giant set)",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x12+10+8",sets_h:"3x10+8+8",sets_s:"4x8+8+6"}]},
+{muscle:"Biceps",exercises:[
+{name:"Barbell 21s",url:"https://exrx.net/WeightExercises/Biceps/BBCurl",sets_c:"4x7+7+7",sets_h:"4x7+7+7",sets_s:"4x7+7+7",note_c:"Low + mid + full range"},
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Preacher curl or EZ bar",url:"https://exrx.net/WeightExercises/Brachialis/DBPreacherCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]},
+{week:6,note_c:"Final week. Max output, tight form.",note_h:"Go heavier than week 5. Benchmark session.",note_s:"Max effort. Log every top weight.",days:[
+{label:"Day 1 — Chest · Triceps · Legs",sections:[
+{muscle:"Chest",exercises:[
+{name:"Flat dumbbell bench press",url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Flat dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"},
+{name:"Incline dumbbell press",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"},
+{name:"Incline dumbbell flyes",url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly",sets_c:"2x15",sets_h:"3x10",sets_s:"3x8"}]},
+{muscle:"Triceps",exercises:[
+{name:"Tricep extension",url:"https://exrx.net/WeightExercises/Triceps/DBTriExt",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Dumbbell kickback",url:"https://exrx.net/WeightExercises/Triceps/DBKickback",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Bench dips",url:"https://exrx.net/WeightExercises/Triceps/WtBenchDip",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8",note_c:"Optional: drop set on last set"}]},
+{muscle:"Legs",exercises:[
+{name:"Any squat variation",url:"https://exrx.net/WeightExercises/Quadriceps/BBSquat",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Dumbbell split squat",url:"https://exrx.net/WeightExercises/Quadriceps/DBSplitSquat",sets_c:"3x12",sets_h:"4x10",sets_s:"5x8"},
+{name:"Leg curl machine",url:"https://exrx.net/WeightExercises/Hamstrings/LVLyingLegCurl",sets_c:"2x15",sets_h:"3x10",sets_s:"4x8"}]}]},
+{label:"Day 2 — Back · Shoulders · Biceps",sections:[
+{muscle:"Back",exercises:[
+{name:"Dumbbell row",url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Bent lateral raise",url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBRearLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Barbell row",url:"https://exrx.net/WeightExercises/BackGeneral/BBBentOverRow",sets_c:"3x12",sets_h:"4x10",sets_s:"5x5"}]},
+{muscle:"Shoulders",exercises:[
+{name:"Seated dumbbell press",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBShoulderPress",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Lateral raise",url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Front raise",url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]},
+{muscle:"Biceps",exercises:[
+{name:"Alternating dumbbell curl",url:"https://exrx.net/WeightExercises/Biceps/DBCurl",sets_c:"1x15, 1x12, 1x10, 2x15",sets_h:"1x10, 1x8, 2x6, 2x10",sets_s:"1x10, 1x8, 1x6, 2x5, 2x10"},
+{name:"Hammer curl",url:"https://exrx.net/WeightExercises/Brachioradialis/DBHammerCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"},
+{name:"Concentration curl",url:"https://exrx.net/WeightExercises/Brachialis/DBConcentrationCurl",sets_c:"3x15",sets_h:"4x10",sets_s:"4x8"}]}]}]}
+];
+
+function render(idx){
+  currentWeek=idx;
+  document.querySelectorAll('.week-btn').forEach(function(b,i){b.classList.toggle('active',i===idx)});
+  var weeks=currentData(),w=weeks[idx],ti=trackInfo();
+  var html='<div class="week-meta"><div class="week-label">Week '+w.week+'</div><span class="track-pill '+ti.cls+'">'+ti.text+'</span><p class="week-note">'+weekNote(w)+'</p></div>';
+  w.days.forEach(function(day,di){
+    html+='<div class="day-section"><div class="day-header"><div class="day-title">'+day.label+'</div></div>';
+    day.sections.forEach(function(sec,si){
+      html+='<div class="muscle-block"><div class="muscle-label">'+sec.muscle+'</div>';
+      sec.exercises.forEach(function(ex,ei){
+        var sets=setsFor(ex),note=noteFor(ex),cnt=parseSetCount(sets),exId=idx+'_'+di+'_'+si+'_'+ei;
+        html+='<div class="exercise-item"><div class="ex-top"><a class="ex-link" href="'+ex.url+'" target="_blank" rel="noopener">'+ex.name+' ↗</a><div class="ex-sets-label">'+sets+'</div></div>';
+        if(note) html+='<div class="ex-note">'+note+'</div>';
+        html+='<button class="log-toggle" onclick="toggleLog(\''+exId+'\','+cnt+')">+ Log sets</button>';
+        html+='<div class="log-area" id="log_'+exId+'" style="display:none"></div></div>';
+      });
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  document.getElementById('content').innerHTML=html;
+  window.scrollTo(0,0);
+}
+
+function toggleLog(exId,cnt){
+  var area=document.getElementById('log_'+exId),btn=area.previousElementSibling;
+  if(area.style.display==='none'){area.style.display='block';btn.textContent='- Hide log';buildLogRows(exId,cnt);}
+  else{area.style.display='none';btn.textContent='+ Log sets';}
+}
+
+function buildLogRows(exId,cnt){
+  var area=document.getElementById('log_'+exId),html='<div class="set-rows">';
+  for(var s=0;s<cnt;s++){
+    var k=exId+'_'+s,saved=getLog(k);
+    html+='<div class="set-row"><label>Set '+(s+1)+'</label>';
+    html+='<input type="number" placeholder="lbs" value="'+saved.weight+'" min="0" step="2.5" oninput="setLog(\''+k+'\',\'weight\',this.value)" >';
+    html+='<input type="number" placeholder="reps" value="'+saved.reps+'" min="0" step="1" oninput="setLog(\''+k+'\',\'reps\',this.value)" >';
+    html+='<input type="checkbox" '+(saved.done?'checked':'')+' onchange="setLog(\''+k+'\',\'done\',this.checked)">';
+    html+='<span class="done-label">done</span></div>';
+  }
+  html+='</div>';
+  area.innerHTML=html;
+}
+
+function setGym(g){
+  gym=g;
+  document.getElementById('btn-db').classList.toggle('active',g==='db');
+  document.getElementById('btn-gym').classList.toggle('active',g==='gym');
+  buildWeekNav();render(0);
+}
+
+function setTrack(t){
+  track=t;
+  ['c','h','s'].forEach(function(x){
+    var b=document.getElementById('btn-'+x);
+    b.className='';
+    if(x===t){b.classList.add('active');b.classList.add('t'+x);}
+  });
+  render(currentWeek);
+}
+
+function buildWeekNav(){
+  var nav=document.getElementById('weekNav');nav.innerHTML='';
+  for(var i=0;i<6;i++){
+    (function(idx){
+      var b=document.createElement('button');
+      b.className='week-btn'+(idx===0?' active':'');
+      b.textContent='Week '+(idx+1);
+      b.onclick=function(){render(idx)};
+      nav.appendChild(b);
+    })(i);
+  }
+}
+
+function showExport(){
+  var lines=[],gl=gym==='db'?'Dumbbells':'Full Gym',tl=track==='c'?'Conditioning':track==='h'?'Hypertrophy':'Strength';
+  lines.push('=== Workout Log — '+gl+' · '+tl+' ===\n');
+  var weeks=currentData();
+  weeks.forEach(function(w,wi){
+    var hasData=false,wLines=['\n-- Week '+w.week+' --'];
+    w.days.forEach(function(day,di){
+      day.sections.forEach(function(sec,si){
+        sec.exercises.forEach(function(ex,ei){
+          var cnt=parseSetCount(setsFor(ex)),setData=[];
+          for(var s=0;s<cnt;s++){
+            var k=wi+'_'+di+'_'+si+'_'+ei+'_'+s,l=getLog(k);
+            if(l.weight||l.reps||l.done) setData.push('  Set '+(s+1)+': '+(l.weight?l.weight+'lbs':'?lbs')+' x '+(l.reps?l.reps+' reps':'? reps')+(l.done?' done':''));
+          }
+          if(setData.length){hasData=true;wLines.push(ex.name);setData.forEach(function(s){wLines.push(s)});}
+        });
+      });
+    });
+    if(hasData) lines=lines.concat(wLines);
+  });
+  if(lines.length===1) lines.push('\nNo sets logged yet.');
+  document.getElementById('exportText').textContent=lines.join('\n');
+  document.getElementById('exportModal').classList.add('show');
+}
+
+function closeExport(){document.getElementById('exportModal').classList.remove('show')}
+function copyLog(){
+  var text=document.getElementById('exportText').textContent;
+  navigator.clipboard.writeText(text).then(function(){
+    var btn=document.querySelector('.modal-btns .primary');
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent='Copy to clipboard'},2000);
+  });
+}
+
+buildWeekNav();
+document.getElementById('btn-c').classList.add('active','tc');
+render(0);
+</script>
+</body>
+</html>

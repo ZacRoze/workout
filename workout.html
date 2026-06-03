@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Workout">
+<title>6-Week Workout</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+  header{background:#fff;border-bottom:1px solid #e8e8e8;padding:16px 20px;position:sticky;top:0;z-index:10}
+  header h1{font-size:17px;font-weight:600;letter-spacing:-0.3px}
+  header p{font-size:12px;color:#888;margin-top:2px}
+  .week-nav{display:flex;gap:6px;overflow-x:auto;padding:14px 20px;background:#fff;border-bottom:1px solid #e8e8e8;scrollbar-width:none}
+  .week-nav::-webkit-scrollbar{display:none}
+  .week-btn{flex-shrink:0;padding:7px 14px;font-size:13px;border-radius:20px;border:1px solid #ddd;background:transparent;color:#666;cursor:pointer;font-family:inherit;transition:all 0.15s}
+  .week-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+  .main{padding:16px 20px 40px}
+  .week-meta{margin-bottom:16px}
+  .week-label{font-size:20px;font-weight:700;letter-spacing:-0.5px}
+  .track-pill{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;margin-top:6px}
+  .conditioning{background:#dcf5ea;color:#0a5c3a}
+  .hypertrophy{background:#ede9fc;color:#3d2fa0}
+  .week-note{font-size:13px;color:#666;margin-top:8px;line-height:1.5}
+  .day-section{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;border:1px solid #e8e8e8}
+  .day-header{padding:13px 16px;background:#f9f9f9;border-bottom:1px solid #e8e8e8}
+  .day-title{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#555}
+  .muscle-block{padding:0 16px}
+  .muscle-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#aaa;padding:12px 0 6px}
+  .exercise-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:10px}
+  .exercise-row:last-child{border-bottom:none}
+  .ex-left{flex:1;min-width:0}
+  .ex-link{font-size:14px;color:#1a6fdc;text-decoration:none;font-weight:500;display:flex;align-items:center;gap:4px;line-height:1.3}
+  .ex-link:active{opacity:0.7}
+  .ex-ext{font-size:10px;opacity:0.5;flex-shrink:0}
+  .ex-note{font-size:11px;color:#999;margin-top:3px;line-height:1.4;font-style:italic}
+  .ex-sets{font-size:12px;color:#666;white-space:nowrap;padding-top:2px;text-align:right;min-width:80px;line-height:1.4}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>6-Week Workout</h1>
+  <p>Dumbbells + bench · Tap any exercise for demo</p>
+</header>
+
+<div class="week-nav" id="weekNav"></div>
+
+<div class="main" id="content"></div>
+
+<script>
+const WEEKS = [
+  {
+    week:1, track:"conditioning",
+    note:"Focus on form and learning movements. Keep weights light.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Flat dumbbell bench press", url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up each set; final 2 sets match your 1x12 weight"},
+            {name:"Flat dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly", sets:"2x15"},
+            {name:"Incline dumbbell press", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress", sets:"3x12"},
+            {name:"Incline dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly", sets:"2x15"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up; final 2 sets match your 1x12 weight"},
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"3x12"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"3x15"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up; final 2 sets match your 1x12 weight"},
+            {name:"Dumbbell split squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBBulgarianSplitSquat", sets:"3x12"},
+            {name:"Dumbbell leg curl", url:"https://exrx.net/WeightExercises/Hamstrings/DBLegCurl", sets:"2x15"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Single-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up; final 2 sets match your 1x12 weight"},
+            {name:"Bent-over lateral raise", url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBBentLateralRaise", sets:"3x15"},
+            {name:"Two-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"3x12"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Seated dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBSeatedPress", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up; final 2 sets match your 1x12 weight"},
+            {name:"Lateral raise", url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise", sets:"3x15"},
+            {name:"Front raise", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"3x15"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Alternating dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBAlternatingCurl", sets:"1x15, 1x12, 1x10, 2x15", note:"Work up; final 2 sets match your 1x12 weight"},
+            {name:"Hammer curl", url:"https://exrx.net/WeightExercises/Biceps/DBHammerCurl", sets:"3x15"},
+            {name:"Concentration curl", url:"https://exrx.net/WeightExercises/Biceps/DBConcentrationCurl", sets:"3x15"},
+          ]},
+        ]
+      }
+    ]
+  },
+  {
+    week:2, track:"conditioning",
+    note:"Same structure as week 1. Try to add small weight where it felt easy last week.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Flat dumbbell bench press", url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress", sets:"1x15, 1x12, 1x10, 2x15"},
+            {name:"Flat bench dumbbell pullover", url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover", sets:"3x15"},
+            {name:"Incline dumbbell press", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress", sets:"3x12"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"3x12"},
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"3x10"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"3x15"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"4x15"},
+            {name:"Dumbbell reverse lunge", url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge", sets:"3x12"},
+            {name:"Dumbbell Romanian deadlift", url:"https://exrx.net/WeightExercises/Hamstrings/DBRomanianDeadlift", sets:"2x15"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Two-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"3x12"},
+            {name:"Flat bench dumbbell pullover", url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover", sets:"3x15"},
+            {name:"Dumbbell deadlift", url:"https://exrx.net/WeightExercises/GluteusMaximus/DBDeadlift", sets:"3x12"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Standing dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBStandingPress", sets:"3x12"},
+            {name:"Front raise", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"3x15"},
+            {name:"Dumbbell upright row", url:"https://exrx.net/WeightExercises/DeltoidLateral/DBUprightRow", sets:"3x15"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Alternating dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBAlternatingCurl", sets:"3x15"},
+            {name:"Dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBCurl", sets:"3x15"},
+            {name:"Incline dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl", sets:"3x15"},
+          ]},
+        ]
+      }
+    ]
+  },
+  {
+    week:3, track:"conditioning",
+    note:"Third week of conditioning. Push for better form and slightly more weight where possible.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Incline dumbbell press", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress", sets:"3x12"},
+            {name:"Flat bench dumbbell pullover", url:"https://exrx.net/WeightExercises/PectoralSternal/DBPullover", sets:"3x15"},
+            {name:"Flat dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly", sets:"3x12"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"3x12"},
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"3x10"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"3x15"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"4x15"},
+            {name:"Dumbbell alternating lunge", url:"https://exrx.net/WeightExercises/Quadriceps/DBLunge", sets:"3x12"},
+            {name:"Dumbbell leg curl", url:"https://exrx.net/WeightExercises/Hamstrings/DBLegCurl", sets:"2x15"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Single-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"3x12"},
+            {name:"Dumbbell Romanian deadlift", url:"https://exrx.net/WeightExercises/Hamstrings/DBRomanianDeadlift", sets:"3x15"},
+            {name:"Dumbbell deadlift", url:"https://exrx.net/WeightExercises/GluteusMaximus/DBDeadlift", sets:"3x12"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Seated dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBSeatedPress", sets:"3x12"},
+            {name:"Front + lateral + bent lateral raise (giant set)", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"3x12+10+8", note:"No rest between the 3 moves"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Alternating dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBAlternatingCurl", sets:"3x15"},
+            {name:"Dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBCurl", sets:"3x15"},
+            {name:"Incline dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl", sets:"3x15"},
+          ]},
+        ]
+      }
+    ]
+  },
+  {
+    week:4, track:"conditioning",
+    note:"Final conditioning week. Benchmark your weights — next week shifts to hypertrophy.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Flat dumbbell bench press", url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress", sets:"3x12"},
+            {name:"Flat dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly", sets:"3x15"},
+            {name:"Incline dumbbell press", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress", sets:"3x12"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"3x12"},
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"3x10"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"3x15"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"4x12"},
+            {name:"Dumbbell split squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBBulgarianSplitSquat", sets:"3x12"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Single-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"3x12"},
+            {name:"Bent-over lateral raise", url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBBentLateralRaise", sets:"3x15"},
+            {name:"Two-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"3x12"},
+            {name:"Dumbbell good morning", url:"https://exrx.net/WeightExercises/Hamstrings/DBGoodMorning", sets:"2x15"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Seated dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBSeatedPress", sets:"3x12"},
+            {name:"Lateral raise", url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise", sets:"3x15"},
+            {name:"Dumbbell upright row", url:"https://exrx.net/WeightExercises/DeltoidLateral/DBUprightRow", sets:"3x15"},
+            {name:"Front raise", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"2x15"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBCurl", sets:"3x15"},
+            {name:"Hammer curl", url:"https://exrx.net/WeightExercises/Biceps/DBHammerCurl", sets:"3x15"},
+            {name:"Concentration curl", url:"https://exrx.net/WeightExercises/Biceps/DBConcentrationCurl", sets:"3x15"},
+          ]},
+        ]
+      }
+    ]
+  },
+  {
+    week:5, track:"hypertrophy",
+    note:"Switching to hypertrophy. Increase weight, drop reps. Focus on controlled tempo — 2 seconds down.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Flat dumbbell bench press", url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress", sets:"1x10, 1x8, 2x6, 2x10", note:"Work up to heavy; final 2 sets back to your 1x8 weight"},
+            {name:"Incline flyes + press (giant set)", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly", sets:"4x6+8", note:"6 flyes then 8 presses, no rest between"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"4x10"},
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"4x8"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"3x10", note:"Final set to failure"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"1x10, 1x8, 2x6, 2x10", note:"Work up; final 2 sets back to your 1x8 weight"},
+            {name:"Dumbbell curtsy squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBCurtsyLunge", sets:"3x10"},
+            {name:"Dumbbell step-up (onto bench)", url:"https://exrx.net/WeightExercises/Quadriceps/DBStepUp", sets:"4x10"},
+            {name:"Single-leg Romanian deadlift", url:"https://exrx.net/WeightExercises/Hamstrings/DBSingleLegDeadlift", sets:"3x10"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Dumbbell deadlift", url:"https://exrx.net/WeightExercises/GluteusMaximus/DBDeadlift", sets:"4x10"},
+            {name:"Two-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"4x10"},
+            {name:"Dumbbell shrug", url:"https://exrx.net/WeightExercises/Trapezius/DBShrug", sets:"4x10"},
+            {name:"Renegade row", url:"https://exrx.net/WeightExercises/BackGeneral/DBRenegadeRow", sets:"3x10"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Standing dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBStandingPress", sets:"1x10, 1x8, 2x6, 2x10", note:"Work up; final 2 sets back to 1x8 weight"},
+            {name:"Front + lateral + bent lateral raise (giant set)", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"3x10+8+8"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Dumbbell 21s", url:"https://exrx.net/WeightExercises/Biceps/DBCurl", sets:"4x7+7+7", note:"Low range + mid range + full range, no rest between"},
+            {name:"Alternating dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBAlternatingCurl", sets:"4x10"},
+            {name:"Incline dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBInclineCurl", sets:"4x10"},
+          ]},
+        ]
+      }
+    ]
+  },
+  {
+    week:6, track:"hypertrophy",
+    note:"Final week. Go heavier than week 5 where you can. This is your benchmark session.",
+    days:[
+      {
+        label:"Day 1 — Chest · Triceps · Legs",
+        sections:[
+          {muscle:"Chest", exercises:[
+            {name:"Flat dumbbell bench press", url:"https://exrx.net/WeightExercises/PectoralSternal/DBBenchPress", sets:"1x10, 1x8, 2x6, 2x10", note:"Work up; final 2 sets match your 1x8 weight"},
+            {name:"Flat dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralSternal/DBFly", sets:"2x15"},
+            {name:"Incline dumbbell press", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineBenchPress", sets:"4x10"},
+            {name:"Incline dumbbell flyes", url:"https://exrx.net/WeightExercises/PectoralClavicular/DBInclineFly", sets:"2x15"},
+          ]},
+          {muscle:"Triceps", exercises:[
+            {name:"Overhead dumbbell extension", url:"https://exrx.net/WeightExercises/Triceps/DBTricepsExtension", sets:"1x10, 1x8, 2x6, 2x10"},
+            {name:"Dumbbell kickback", url:"https://exrx.net/WeightExercises/Triceps/DBKickback", sets:"4x10"},
+            {name:"Bench dips", url:"https://exrx.net/WeightExercises/Triceps/BenchDip", sets:"4x10", note:"Optional: drop set to burnout on last set"},
+          ]},
+          {muscle:"Legs", exercises:[
+            {name:"Goblet squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBGobletSquat", sets:"1x10, 1x8, 2x6, 2x10"},
+            {name:"Dumbbell split squat", url:"https://exrx.net/WeightExercises/Quadriceps/DBBulgarianSplitSquat", sets:"4x10"},
+            {name:"Dumbbell leg curl", url:"https://exrx.net/WeightExercises/Hamstrings/DBLegCurl", sets:"3x10"},
+          ]},
+        ]
+      },
+      {
+        label:"Day 2 — Back · Shoulders · Biceps",
+        sections:[
+          {muscle:"Back", exercises:[
+            {name:"Single-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"1x10, 1x8, 2x6, 2x10"},
+            {name:"Bent-over lateral raise", url:"https://exrx.net/WeightExercises/DeltoidPosterior/DBBentLateralRaise", sets:"4x10"},
+            {name:"Two-arm dumbbell row", url:"https://exrx.net/WeightExercises/BackGeneral/DBBentOverRow", sets:"4x10"},
+          ]},
+          {muscle:"Shoulders", exercises:[
+            {name:"Seated dumbbell press", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBSeatedPress", sets:"1x10, 1x8, 2x6, 2x10"},
+            {name:"Lateral raise", url:"https://exrx.net/WeightExercises/DeltoidLateral/DBLateralRaise", sets:"4x10"},
+            {name:"Front raise", url:"https://exrx.net/WeightExercises/DeltoidAnterior/DBFrontRaise", sets:"4x10"},
+          ]},
+          {muscle:"Biceps", exercises:[
+            {name:"Alternating dumbbell curl", url:"https://exrx.net/WeightExercises/Biceps/DBAlternatingCurl", sets:"1x10, 1x8, 2x6, 2x10"},
+            {name:"Hammer curl", url:"https://exrx.net/WeightExercises/Biceps/DBHammerCurl", sets:"4x10"},
+            {name:"Concentration curl", url:"https://exrx.net/WeightExercises/Biceps/DBConcentrationCurl", sets:"4x10"},
+          ]},
+        ]
+      }
+    ]
+  }
+];
+
+const nav = document.getElementById('weekNav');
+const content = document.getElementById('content');
+
+function render(idx) {
+  nav.querySelectorAll('.week-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  const w = WEEKS[idx];
+  let html = `<div class="week-meta">
+    <div class="week-label">Week ${w.week}</div>
+    <span class="track-pill ${w.track}">${w.track === 'conditioning' ? 'Conditioning' : 'Hypertrophy'}</span>
+    <p class="week-note">${w.note}</p>
+  </div>`;
+  w.days.forEach(day => {
+    html += `<div class="day-section"><div class="day-header"><div class="day-title">${day.label}</div></div>`;
+    day.sections.forEach(sec => {
+      html += `<div class="muscle-block"><div class="muscle-label">${sec.muscle}</div>`;
+      sec.exercises.forEach(ex => {
+        html += `<div class="exercise-row">
+          <div class="ex-left">
+            <a class="ex-link" href="${ex.url}" target="_blank" rel="noopener">${ex.name} <span class="ex-ext">↗</span></a>
+            ${ex.note ? `<div class="ex-note">${ex.note}</div>` : ''}
+          </div>
+          <div class="ex-sets">${ex.sets}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+  content.innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+for(let i=0;i<6;i++){
+  const b = document.createElement('button');
+  b.className = 'week-btn';
+  b.textContent = `Week ${i+1}`;
+  b.onclick = () => render(i);
+  nav.appendChild(b);
+}
+render(0);
+</script>
+</body>
+</html>
